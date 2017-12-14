@@ -1,0 +1,34 @@
+---
+
+- name: Install OCP Pre-Req Packages
+  yum: name={{ item }} state=present
+  with_items:
+    - wget
+    - net-tools
+    - git
+    - bind-utils
+    - iptables-services
+    - bridge-utils
+    - bash-completion
+    - kexec-tools
+
+- name: Install OCP Packages
+  yum: name={{ item }} state=present
+  with_items:
+    - atomic-openshift-utils
+    - atomic-openshift-excluder
+    - atomic-openshift-docker-excluder
+
+- name: Install docker 
+  yum: name=docker state=present
+
+- name: define OCP disks
+  lineinfile: path=/etc/sysconfig/docker-storage-setup line={{ item }}
+  with_items:
+    - "DEVS=/dev/vdb"
+    - "VG=docker-vg"
+
+- name: create OCP disk
+  shell:  docker-storage-setup
+  args:
+    creates: /dev/docker-vg
